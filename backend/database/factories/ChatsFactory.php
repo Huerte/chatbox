@@ -14,7 +14,8 @@ class ChatsFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::inRandomOrder()->first()->id,
+            'sender_id' => User::inRandomOrder()->first()->id,
+            'receiver_id' => User::inRandomOrder()->first()->id,
             'message' => fake()->sentence(),
         ];
     }

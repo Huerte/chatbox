@@ -20,11 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const emojiPicker     = document.getElementById('emoji-picker');
     const searchInput     = document.getElementById('search-input');
 
-    // ---- Contacts (populated from backend) ----
-    const contacts = [
-        { id: 1, name: 'Jan Joshua Cubelo Bading', initials: 'JJ', from: 'from-pink-500', to: 'to-rose-500' },
-    ];
-
     // ---- Per-contact message store ----
     const messageStore = {}; // { [contactId]: [{ text, sender }] }
     contacts.forEach(c => { messageStore[c.id] = []; });

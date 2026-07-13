@@ -36,7 +36,20 @@
 
         {{-- Contact List --}}
         <nav class="flex-1 overflow-y-auto px-2 py-1 space-y-0.5 scrollbar-thin" id="contact-list">
-            {{-- Populated by JS --}}
+            <ul class="space-y-1">
+               @forelse ($users as $user)
+                    <li>
+                        <a href="{{ route('chat.show', $user->id) }}" class="flex items-center gap-3 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/5 transition-all duration-150">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500/20 to-indigo-600/20 border border-white/10 flex items-center justify-center text-xs font-bold text-violet-400">
+                                {{ substr($user->name, 0, 1) }}
+                            </div>
+                            <span class="text-sm font-medium">{{ $user->name }}</span>
+                        </a>
+                    </li>
+                @empty
+                    <li class="text-white/50 text-xs text-center py-4">No users found.</li>
+                @endforelse
+            </ul>
         </nav>
 
         {{-- Profile Info Panel (hidden by default) --}}
@@ -91,6 +104,7 @@
     {{-- ===================== MAIN CHAT AREA ===================== --}}
     <main class="flex-1 flex flex-col min-w-0 bg-[#0d0f14]">
 
+        @if(!$receiver)
         {{-- Empty State --}}
         <div id="no-chat-state" class="flex-1 flex flex-col items-center justify-center gap-3 text-center px-8">
             <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-violet-500/10 to-indigo-600/10 border border-violet-500/10 flex items-center justify-center mb-3">
@@ -101,9 +115,9 @@
             <p class="text-white/50 text-sm font-semibold">Select a contact to start chatting</p>
             <p class="text-white/20 text-xs">Your messages will appear here</p>
         </div>
-
+        @else
         {{-- Active Chat --}}
-        <div id="chat-area" class="flex-1 flex min-h-0 hidden">
+        <div id="chat-area" class="flex-1 flex min-h-0">
 
             {{-- Chat Column --}}
             <div class="flex-1 flex flex-col min-w-0 relative">
@@ -122,11 +136,11 @@
                 {{-- Chat Header --}}
                 <header class="flex items-center gap-4 px-6 py-3.5 border-b border-white/5 bg-[#0d0f14]/80 backdrop-blur-xl flex-shrink-0">
                     <div class="relative flex-shrink-0">
-                        <div id="header-avatar" class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-lg"></div>
+                        <div id="header-avatar" class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500/20 to-indigo-600/20 border border-white/10 flex items-center justify-center text-sm font-bold text-violet-400 shadow-lg">{{ substr($receiver->name, 0, 1) }}</div>
                         <span id="header-status-dot" class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#0d0f14]"></span>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <h1 id="header-name" class="text-base font-semibold text-white truncate leading-tight"></h1>
+                        <h1 id="header-name" class="text-base font-semibold text-white truncate leading-tight">{{ $receiver->name }}</h1>
                         <div class="flex items-center gap-2 mt-0.5" id="header-status-wrapper">
                             <p class="text-xs text-emerald-400 flex items-center gap-1.5" id="header-status-text">
                                 <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse inline-block"></span>
@@ -166,7 +180,15 @@
                 </header>
 
                 {{-- Messages --}}
-                <div class="flex-1 overflow-y-auto px-6 py-4 scrollbar-thin" id="messages-container">
+                <div class="flex-1 overflow-y-auto px-6 py-4 scrollbar-thin flex flex-col gap-4" id="messages-container">
+                    @foreach ($messages as $chat)
+                        <div class="flex {{ $chat->sender_id === auth()->id() ? 'justify-end' : 'justify-start' }}">
+                            <div class="max-w-[70%] {{ $chat->sender_id === auth()->id() ? 'bg-violet-600 rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl rounded-br-sm' : 'bg-[#1a1d26] border border-white/5 rounded-tl-2xl rounded-tr-2xl rounded-br-2xl rounded-bl-sm' }} px-4 py-2.5 shadow-md">
+                                <p class="text-sm text-white/90 leading-relaxed">{{ $chat->message }}</p>
+                                <p class="text-[10px] text-white/40 mt-1 {{ $chat->sender_id === auth()->id() ? 'text-right' : 'text-left' }}">{{ $chat->created_at->format('g:i A') }}</p>
+                            </div>
+                        </div>
+                    @endforeach
                     <div id="scroll-anchor"></div>
                 </div>
 
@@ -182,46 +204,46 @@
                         </div>
                     </div>
 
-                    <div class="flex items-end gap-2 bg-[#1a1d26] border border-white/8 rounded-2xl px-3 py-3 focus-within:border-violet-500/40 focus-within:bg-[#1e2133] transition-all duration-200 shadow-lg">
-
+                    <form method="POST" action="{{ route('chat.store', $receiver->id) }}" class="flex items-end gap-2 bg-[#1a1d26] border border-white/8 rounded-2xl px-3 py-3 focus-within:border-violet-500/40 focus-within:bg-[#1e2133] transition-all duration-200 shadow-lg">
+                        @csrf
                         {{-- Attachment (decorative) --}}
-                        <button title="Attach file" class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-white/25 hover:text-violet-400 hover:bg-violet-500/10 rounded-xl transition-all duration-200 mb-0.5">
+                        <button type="button" title="Attach file" class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-white/25 hover:text-violet-400 hover:bg-violet-500/10 rounded-xl transition-all duration-200 mb-0.5">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
                             </svg>
                         </button>
 
                         {{-- Image (decorative) --}}
-                        <button title="Send image" class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-white/25 hover:text-sky-400 hover:bg-sky-500/10 rounded-xl transition-all duration-200 mb-0.5">
+                        <button type="button" title="Send image" class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-white/25 hover:text-sky-400 hover:bg-sky-500/10 rounded-xl transition-all duration-200 mb-0.5">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                             </svg>
                         </button>
 
                         {{-- Textarea --}}
-                        <textarea id="message-input" rows="1"
+                        <textarea id="message-input" name="message" rows="1" required
                             placeholder="Type a message..."
                             class="flex-1 bg-transparent text-sm text-white/90 placeholder-white/25 resize-none border-0 focus:ring-0 focus:outline-none leading-relaxed max-h-32 scrollbar-thin mx-1"></textarea>
 
                         {{-- Gif (decorative) --}}
-                        <button title="GIF" class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-white/25 hover:text-amber-400 hover:bg-amber-500/10 rounded-xl transition-all duration-200 mb-0.5 text-[10px] font-bold">
+                        <button type="button" title="GIF" class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-white/25 hover:text-amber-400 hover:bg-amber-500/10 rounded-xl transition-all duration-200 mb-0.5 text-[10px] font-bold">
                             GIF
                         </button>
 
                         {{-- Emoji --}}
-                        <button id="emoji-btn" title="Emoji" class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-white/25 hover:text-amber-400 hover:bg-amber-500/10 rounded-xl transition-all duration-200 mb-0.5">
+                        <button type="button" id="emoji-btn" title="Emoji" class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-white/25 hover:text-amber-400 hover:bg-amber-500/10 rounded-xl transition-all duration-200 mb-0.5">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </button>
 
                         {{-- Send --}}
-                        <button id="send-btn" title="Send" class="flex-shrink-0 w-8 h-8 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 flex items-center justify-center shadow-lg shadow-violet-500/30 transition-all duration-200 hover:scale-105 active:scale-95 mb-0.5">
+                        <button type="submit" id="send-btn" title="Send" class="flex-shrink-0 w-8 h-8 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 flex items-center justify-center shadow-lg shadow-violet-500/30 transition-all duration-200 hover:scale-105 active:scale-95 mb-0.5">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                             </svg>
                         </button>
-                    </div>
+                    </form>
                 </div>
             </div>
 
@@ -230,8 +252,8 @@
 
                 {{-- Contact card --}}
                 <div class="flex flex-col items-center px-5 pt-6 pb-4 border-b border-white/5">
-                    <div id="info-avatar" class="w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-bold text-white shadow-xl mb-3"></div>
-                    <p id="info-name" class="text-sm font-semibold text-white mb-0.5"></p>
+                    <div id="info-avatar" class="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/20 to-indigo-600/20 border border-white/10 flex items-center justify-center text-xl font-bold text-violet-400 shadow-xl mb-3">{{ substr($receiver->name, 0, 1) }}</div>
+                    <p id="info-name" class="text-sm font-semibold text-white mb-0.5">{{ $receiver->name }}</p>
                     <p class="text-xs text-emerald-400 flex items-center gap-1.5">
                         <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse inline-block"></span>
                         Active now
@@ -316,6 +338,7 @@
                 </div>
             </aside>
         </div>
+        @endif
     </main>
 </div>
 
