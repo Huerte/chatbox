@@ -332,10 +332,10 @@
             {{-- Pulsing ring animation --}}
             <div class="absolute inset-0 rounded-full bg-violet-500/20 animate-ping"></div>
             <div class="absolute -inset-2 rounded-full border border-violet-500/10 animate-pulse"></div>
-            <div id="call-avatar" class="relative w-full h-full rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-xl">AR</div>
+            <div id="call-avatar" class="relative w-full h-full rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-xl">JJ</div>
         </div>
         
-        <h2 id="call-contact-name" class="text-lg font-semibold text-white mb-1">Alice Reyes</h2>
+        <h2 id="call-contact-name" class="text-lg font-semibold text-white mb-1">Jan Joshua Cubelo Bading</h2>
         <p id="call-status" class="text-xs text-white/40 mb-8 tracking-wide">Ringing...</p>
         
         <div class="flex justify-center gap-4">
