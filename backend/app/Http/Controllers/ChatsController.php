@@ -3,29 +3,49 @@
 namespace App\Http\Controllers;
 
 use App\Models\Chats;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class ChatsController extends Controller
 {
     
     public function index() {
-        $chats = Chats::with('user')->orderBy('created_at', 'asc')  ->get();
-
-        return view('chat.index', ['chats' => $chats]);
+        $users = User::all()->except(auth()->id());
+        return view('chat.index', [
+            'users' => $users,
+            'receiver' => null,
+            'messages' => collect()
+        ]);
     }
 
-    public function store(Request $request) {
+    public function store(Request $request, User $receiver) {
         
         $validated = $request->validate([
             'message' => ['required', 'max:500'],
         ]);
 
         Chats::create([
-            'user_id' => auth()->id(),
+            'sender_id' => auth()->id(),
+            'receiver_id' => $receiver->id,
             'message' => $validated['message']
         ]);
 
-        return redirect()->route('chat.index');
+        return back();
+
+    }
+
+    public function show(User $receiver) {
+
+        $currentUserId = auth()->id();
+
+        $messages = Chats::betweenUsers($currentUserId, $receiver->id)->orderBy('created_at', 'asc')->get();
+        $users = User::all()->except(auth()->id());
+
+        return view('chat.index', [
+            'users' => $users,
+            'receiver' => $receiver,
+            'messages' => $messages,
+        ]);
 
     }
 

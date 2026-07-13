@@ -11,11 +11,24 @@ class Chats extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'message'
+        'sender_id',
+        'receiver_id',
+        'message',
     ];
 
-    public function user() {
-        return $this->belongsTo(User::class);
+    public function sender() {
+        return $this->belongsTo(User::class, 'sender_id');
+    }
+
+    public function receiver() {
+        return $this->belongsTo(User::class, 'receiver_id');
+    }
+
+    public function scopeBetweenUsers($query, $userId1, $userId2) {
+        return $query->where(function ($q) use ($userId1, $userId2) {
+            $q->where('sender_id', $userId1)->where('receiver_id', $userId2);
+        })->orWhere(function ($q) use ($userId1, $userId2) {
+            $q->where('sender_id', $userId2)->where('receiver_id', $userId1);
+        });
     }
 }
