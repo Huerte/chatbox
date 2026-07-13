@@ -1,3 +1,6 @@
+# Local development guides (not for version control)
+BACKEND_GUIDE.md
+
 *.log
 .DS_Store
 .env
