@@ -72,8 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span id="contact-status-dot-${c.id}" class="absolute bottom-0 right-0 w-2.5 h-2.5 ${dotColor} rounded-full border-2 border-[#12151c]"></span>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium text-white/80 truncate block">${escapeHtml(c.name)}</span>
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-sm font-medium text-white/80 truncate">${escapeHtml(c.name)}</span>
                         ${timeHtml}
                     </div>
                     <p class="text-xs text-white/30 truncate">${escapeHtml(preview.slice(0, 40))}</p>
@@ -466,10 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 10);
     }
 
-    if (voiceBtn) voiceBtn.addEventListener('click', () => startCallSimulation(false));
-    if (videoBtn) videoBtn.addEventListener('click', () => startCallSimulation(true));
-    if (sideVoiceBtn) sideVoiceBtn.addEventListener('click', () => startCallSimulation(false));
-    if (sideVideoBtn) sideVideoBtn.addEventListener('click', () => startCallSimulation(true));
+    // Call simulation is disabled - buttons are purely decorative for now
 
     function endCallSimulation() {
         callPanel.classList.remove('scale-100');
