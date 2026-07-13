@@ -72,8 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span id="contact-status-dot-${c.id}" class="absolute bottom-0 right-0 w-2.5 h-2.5 ${dotColor} rounded-full border-2 border-[#12151c]"></span>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium text-white/80 truncate block">${escapeHtml(c.name)}</span>
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-sm font-medium text-white/80 truncate">${escapeHtml(c.name)}</span>
                         ${timeHtml}
                     </div>
                     <p class="text-xs text-white/30 truncate">${escapeHtml(preview.slice(0, 40))}</p>
