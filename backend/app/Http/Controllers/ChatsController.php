@@ -9,8 +9,7 @@ class ChatsController extends Controller
 {
     
     public function index() {
-        $chats = Chats::with('user')->orderBy('created_at', 'asc')
-        ->get();
+        $chats = Chats::with('user')->orderBy('created_at', 'asc')  ->get();
 
         return view('chat.index', ['chats' => $chats]);
     }
@@ -22,7 +21,7 @@ class ChatsController extends Controller
         ]);
 
         Chats::create([
-            'user_id' => auth()->id,
+            'user_id' => auth()->id(),
             'message' => $validated['message']
         ]);
 
@@ -31,7 +30,7 @@ class ChatsController extends Controller
     }
 
     public function destroy(Chats $chat) {
-        $this->authorize('delete', $chat);
+        abort_if($chat->user_id !== auth()->id(), 403);
         
         $chat->delete();
 
