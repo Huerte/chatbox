@@ -466,10 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 10);
     }
 
-    if (voiceBtn) voiceBtn.addEventListener('click', () => startCallSimulation(false));
-    if (videoBtn) videoBtn.addEventListener('click', () => startCallSimulation(true));
-    if (sideVoiceBtn) sideVoiceBtn.addEventListener('click', () => startCallSimulation(false));
-    if (sideVideoBtn) sideVideoBtn.addEventListener('click', () => startCallSimulation(true));
+    // Call simulation is disabled - buttons are purely decorative for now
 
     function endCallSimulation() {
         callPanel.classList.remove('scale-100');
