@@ -201,7 +201,7 @@
                         {{-- Textarea --}}
                         <textarea id="message-input" rows="1"
                             placeholder="Type a message..."
-                            class="flex-1 bg-transparent text-sm text-white/90 placeholder-white/25 resize-none focus:outline-none leading-relaxed max-h-32 scrollbar-thin mx-1"></textarea>
+                            class="flex-1 bg-transparent text-sm text-white/90 placeholder-white/25 resize-none border-0 focus:ring-0 focus:outline-none leading-relaxed max-h-32 scrollbar-thin mx-1"></textarea>
 
                         {{-- Gif (decorative) --}}
                         <button title="GIF" class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-white/25 hover:text-amber-400 hover:bg-amber-500/10 rounded-xl transition-all duration-200 mb-0.5 text-[10px] font-bold">
