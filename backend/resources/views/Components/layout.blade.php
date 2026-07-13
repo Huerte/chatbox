@@ -1,13 +1,24 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="ChatBox – Real-time messaging for teams and individuals">
-    <title>ChatBox</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chatbox</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="h-full bg-[#0d0f14] text-white antialiased">
-    {{ $slot }}
+<body>
+    <nav>
+        @auth
+            <span>{{ auth()->user()->name }}</span>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit">Logout</button>
+            </form>
+        @endauth
+    </nav>
+
+    <main>
+        {{ $slot }}
+    </main>
 </body>
 </html>

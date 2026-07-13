@@ -7,6 +7,14 @@ use Illuminate\Http\Request;
 
 class ChatsController extends Controller
 {
+    
+    public function index() {
+        $chats = Chats::with('user')->orderBy('created_at', 'asc')
+        ->get();
+
+        return view('chat.index', ['chats' => $chats]);
+    }
+
     public function store(Request $request) {
         
         $validated = $request->validate([
@@ -18,11 +26,15 @@ class ChatsController extends Controller
             'message' => $validated['message']
         ]);
 
-        return redirect('/');
+        return redirect()->route('chat.index');
 
     }
 
-    public function destroy(Chats $chats) {
-        $chats->delete();
+    public function destroy(Chats $chat) {
+        $this->authorize('delete', $chat);
+        
+        $chat->delete();
+
+        return redirect()->route('chat.index');
     }
 }
