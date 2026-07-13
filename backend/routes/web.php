@@ -1,11 +1,14 @@
 <?php
 
+use App\Models\User;
 use App\Http\Controllers\ChatsController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('welcome', [
+        'users' => User::all(),
+    ]);
 });
 
 Route::get('/dashboard', function () {
