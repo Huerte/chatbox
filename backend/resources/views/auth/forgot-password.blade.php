@@ -22,6 +22,6 @@
             <x-primary-button class="bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-900">
                 {{ __('Email Password Reset Link') }}
             </x-primary-button>
-        </div>
+        </div> 
     </form>
 </x-guest-layout>
