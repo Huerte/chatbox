@@ -222,8 +222,6 @@
                             </svg>
                         </button>
                     </div>
-
-                    <p class="text-center text-[10px] text-white/10 mt-2 tracking-wide">End-to-end encrypted</p>
                 </div>
             </div>
 
