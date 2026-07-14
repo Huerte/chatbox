@@ -5,14 +5,6 @@ use App\Http\Controllers\ChatsController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('chat.index', [
-        'users' => User::all()->except(auth()->id()),
-        'receiver' => null,
-        'messages' => collect(),
-    ]);
-});
-
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -25,6 +17,15 @@ Route::middleware('auth')->group(function () {
     Route::delete('/chat/{chat}', [ChatsController::class, 'destroy'])->name('chat.destroy');
     Route::get('/chat/{receiver}', [ChatsController::class, 'show'])->name('chat.show');
     Route::post('/chat/{receiver}', [ChatsController::class, 'store'])->name('chat.store');
+
+    Route::get('/', function () {
+        return view('chat.index', [
+            'users' => User::all()->except(auth()->id()),
+            'receiver' => null,
+            'messages' => collect(),
+        ]);
+    });
+    
 });
 
 require __DIR__.'/auth.php';
