@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===== Scrollbar ===== */
 .scrollbar-thin {
     scrollbar-width: thin;
     scrollbar-color: rgba(255,255,255,0.07) transparent;
@@ -12,27 +11,22 @@
 .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); border-radius: 4px; }
 .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.14); }
 
-/* ===== Conversation Items ===== */
 .conversation-item { background: transparent; cursor: pointer; }
 .conversation-item:hover { background: rgba(255,255,255,0.04); }
 .conversation-item.active-conv { background: rgba(139,92,246,0.12); }
 .conversation-item.active-conv span { color: rgba(255,255,255,1); }
 
-/* ===== Textarea ===== */
 #message-input { overflow: hidden; transition: height 0.1s ease; }
 
-/* ===== Message animation ===== */
 @keyframes message-in {
     from { opacity: 0; transform: translateY(6px) scale(0.97); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* ===== Send button glow ===== */
 #send-btn:hover {
     box-shadow: 0 0 0 6px rgba(139,92,246,0.15), 0 4px 15px rgba(139,92,246,0.35);
 }
 
-/* ===== Emoji picker ===== */
 #emoji-picker {
     animation: fade-up 0.15s ease both;
 }
@@ -41,7 +35,6 @@
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== Profile panel slide-up ===== */
 @keyframes slide-up {
     from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -50,14 +43,12 @@
     animation: slide-up 0.18s ease both;
 }
 
-/* ===== Active status option ===== */
 .active-status {
     background: rgba(255,255,255,0.06);
     color: rgba(255,255,255,0.95);
     font-weight: 600;
 }
 
-/* ===== Message reactions popover ===== */
 .message-emoji-panel:not(.hidden) {
     animation: fade-up 0.12s cubic-bezier(0.16, 1, 0.3, 1) both;
 }

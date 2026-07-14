@@ -2,35 +2,30 @@ import Alpine from 'alpinejs';
 window.Alpine = Alpine;
 Alpine.start();
 
-// ===== ChatBox — Simple Version =====
-
 document.addEventListener('DOMContentLoaded', () => {
-
-    // ---- Elements ----
-    const contactList     = document.getElementById('contact-list');
-    const noChatState     = document.getElementById('no-chat-state');
-    const chatArea        = document.getElementById('chat-area');
+    const contactList = document.getElementById('contact-list');
+    const noChatState = document.getElementById('no-chat-state');
+    const chatArea = document.getElementById('chat-area');
     const messagesContainer = document.getElementById('messages-container');
-    const scrollAnchor    = document.getElementById('scroll-anchor');
-    const headerAvatar    = document.getElementById('header-avatar');
-    const headerName      = document.getElementById('header-name');
-    const messageInput    = document.getElementById('message-input');
-    const sendBtn         = document.getElementById('send-btn');
-    const emojiBtn        = document.getElementById('emoji-btn');
-    const emojiPicker     = document.getElementById('emoji-picker');
-    const searchInput     = document.getElementById('search-input');
+    const scrollAnchor = document.getElementById('scroll-anchor');
+    const headerAvatar = document.getElementById('header-avatar');
+    const headerName = document.getElementById('header-name');
+    const messageInput = document.getElementById('message-input');
+    const sendBtn = document.getElementById('send-btn');
+    const emojiBtn = document.getElementById('emoji-btn');
+    const emojiPicker = document.getElementById('emoji-picker');
+    const searchInput = document.getElementById('search-input');
 
-    // ---- Per-contact message store ----
-    const messageStore = {}; // { [contactId]: [{ text, sender }] }
-    contacts.forEach(c => { messageStore[c.id] = []; });
+    const messageStore = {};
+    if (typeof contacts !== 'undefined') {
+        contacts.forEach(c => { messageStore[c.id] = []; });
+    }
 
     let activeId = null;
-    const blockedContacts = {}; // { [contactId]: boolean }
+    const blockedContacts = {};
 
-    // =============================
-    //  RENDER CONTACTS
-    // =============================
     function renderContacts(filter = '') {
+        if (typeof contacts === 'undefined') return;
         contactList.innerHTML = '';
         const filtered = contacts.filter(c => c.name.toLowerCase().includes(filter.toLowerCase()));
 
@@ -79,25 +74,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // =============================
-    //  SET ACTIVE CONTACT
-    // =============================
     function setActive(id) {
         activeId = id;
         const contact = contacts.find(c => c.id === id);
         if (!contact) return;
 
-        // Update sidebar active state
         document.querySelectorAll('.conversation-item').forEach(el => el.classList.remove('active-conv'));
         const btn = document.getElementById(`contact-${id}`);
         if (btn) btn.classList.add('active-conv');
 
-        // Update header
         headerName.textContent = contact.name;
         headerAvatar.className = `w-10 h-10 rounded-full bg-gradient-to-br ${contact.from} ${contact.to} flex items-center justify-center text-sm font-bold text-white shadow-lg`;
         headerAvatar.textContent = contact.initials;
 
-        // Block state elements update
         const isBlocked = blockedContacts[contact.id];
         const statusDot = document.getElementById('header-status-dot');
         const statusText = document.getElementById('header-status-text');
@@ -132,7 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Hide search input if open when switching contacts
         const searchInputBox = document.getElementById('chat-search-input');
         if (searchInputBox) {
             searchInputBox.classList.add('hidden');
@@ -140,7 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (statusText) statusText.classList.remove('hidden');
 
-        // Update right info panel
         const infoName = document.getElementById('info-name');
         const infoAvatar = document.getElementById('info-avatar');
         if (infoName) infoName.textContent = contact.name;
@@ -149,23 +136,17 @@ document.addEventListener('DOMContentLoaded', () => {
             infoAvatar.textContent = contact.initials;
         }
 
-        // Show chat area
         noChatState.classList.add('hidden');
         chatArea.classList.remove('hidden');
 
-        // Update input placeholder
         messageInput.placeholder = `Message ${contact.name}...`;
 
-        // Render messages for this contact
         renderMessages(id);
         messageInput.focus();
     }
 
-    // =============================
-    //  RENDER MESSAGES
-    // =============================
     function renderMessages(contactId) {
-        // Clear current messages (keep scroll anchor)
+        if (typeof contacts === 'undefined') return;
         messagesContainer.querySelectorAll('.message-row, .date-divider').forEach(el => el.remove());
 
         const messages = messageStore[contactId] || [];
@@ -182,7 +163,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Date divider
         const divider = document.createElement('div');
         divider.className = 'date-divider flex items-center gap-3 my-4';
         divider.innerHTML = `
@@ -196,9 +176,6 @@ document.addEventListener('DOMContentLoaded', () => {
         scrollToBottom(false);
     }
 
-    // =============================
-    //  SEND MESSAGE
-    // =============================
     function sendMessage() {
         if (!activeId) return;
         const text = messageInput.value.trim();
@@ -209,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         messageInput.value = '';
         messageInput.style.height = 'auto';
-        renderContacts(searchInput.value); // refresh preview
+        renderContacts(searchInput.value);
     }
 
     sendBtn.addEventListener('click', sendMessage);
@@ -221,9 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
         messageInput.style.height = Math.min(messageInput.scrollHeight, 128) + 'px';
     });
 
-    // =============================
-    //  APPEND MESSAGE TO DOM
-    // =============================
     function appendMessageDOM(contactId, text, sender, animate = true) {
         const isMe = sender === 'me';
         const contact = contacts.find(c => c.id === contactId);
@@ -263,7 +237,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const avatar = `<div class="w-7 h-7 rounded-full bg-gradient-to-br ${from} ${to} flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-white mb-0.5">${initials}</div>`;
 
-        // Reactions container elements
         row.innerHTML = `
             ${!isMe ? avatar : ''}
             <div class="flex flex-col gap-0.5 ${isMe ? 'items-end' : ''} relative max-w-xs lg:max-w-md">
@@ -290,11 +263,10 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
 
-        // Wire reactions triggers
         const trigger = row.querySelector('.reaction-trigger');
         const panel = row.querySelector('.message-emoji-panel');
         const list = row.querySelector('.reactions-list');
-        const activeReactions = {}; // { emoji: count }
+        const activeReactions = {};
 
         if (trigger && panel) {
             trigger.addEventListener('click', (e) => {
@@ -302,7 +274,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 panel.classList.toggle('hidden');
             });
 
-            // Close on document click
             document.addEventListener('click', () => panel.classList.add('hidden'));
 
             panel.querySelectorAll('.quick-react-btn').forEach(btn => {
@@ -310,10 +281,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const emoji = btn.textContent;
                     
                     if (activeReactions[emoji]) {
-                        // Toggle reaction off
                         delete activeReactions[emoji];
                     } else {
-                        // Add reaction
                         activeReactions[emoji] = 1;
                     }
 
@@ -340,11 +309,9 @@ document.addEventListener('DOMContentLoaded', () => {
         messagesContainer.insertBefore(row, scrollAnchor);
         if (animate) scrollToBottom();
 
-        // Animate checkmarks for user messages
         if (isMe && animate) {
             const receipt = row.querySelector('.read-receipt');
             
-            // Deliver: Double checkmark (gray) after 800ms
             setTimeout(() => {
                 if (receipt) {
                     receipt.className = "read-receipt text-white/30";
@@ -356,7 +323,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }, 800);
 
-            // Read: Double checkmark (purple) after 1600ms
             setTimeout(() => {
                 if (receipt) {
                     receipt.className = "read-receipt text-violet-400";
@@ -365,35 +331,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // =============================
-    //  EMOJI PICKER
-    // =============================
-    emojiBtn.addEventListener('click', e => {
-        e.stopPropagation();
-        emojiPicker.classList.toggle('hidden');
-    });
-    document.querySelectorAll('.emoji-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            messageInput.value += btn.textContent;
-            messageInput.dispatchEvent(new Event('input'));
-            messageInput.focus();
-            emojiPicker.classList.add('hidden');
+    if (emojiBtn && emojiPicker) {
+        emojiBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            emojiPicker.classList.toggle('hidden');
         });
-    });
-    document.addEventListener('click', e => {
-        if (!emojiPicker.contains(e.target) && e.target !== emojiBtn) {
-            emojiPicker.classList.add('hidden');
-        }
-    });
+        document.querySelectorAll('.emoji-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                messageInput.value += btn.textContent;
+                messageInput.dispatchEvent(new Event('input'));
+                messageInput.focus();
+                emojiPicker.classList.add('hidden');
+            });
+        });
+        document.addEventListener('click', e => {
+            if (!emojiPicker.contains(e.target) && e.target !== emojiBtn) {
+                emojiPicker.classList.add('hidden');
+            }
+        });
+    }
 
-    // =============================
-    //  SEARCH
-    // =============================
     searchInput.addEventListener('input', () => renderContacts(searchInput.value));
 
-    // =============================
-    //  HELPERS
-    // =============================
     const scrollToBottom = (smooth = true) =>
         scrollAnchor.scrollIntoView({ behavior: smooth ? 'smooth' : 'instant', block: 'nearest', inline: 'nearest' });
 
@@ -403,9 +362,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return d.innerHTML;
     }
 
-    // =============================
-    //  PROFILE PANEL TOGGLE
-    // =============================
     const profileBtn     = document.getElementById('profile-btn');
     const profilePanel   = document.getElementById('profile-panel');
     const profileChevron = document.getElementById('profile-chevron');
@@ -418,9 +374,6 @@ document.addEventListener('DOMContentLoaded', () => {
         profileChevron.style.transform = isOpen ? '' : 'rotate(180deg)';
     });
 
-    // =============================
-    //  INFO PANEL TOGGLE
-    // =============================
     const infoToggle = document.getElementById('info-toggle');
     const infoPanel  = document.getElementById('info-panel');
     if (infoToggle && infoPanel) {
@@ -429,9 +382,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // =============================
-    //  CALL OVERLAY SIMULATION
-    // =============================
     const callModal = document.getElementById('call-modal');
     const callDecline = document.getElementById('call-decline');
     const callAccept = document.getElementById('call-accept');
@@ -446,12 +396,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const sideVideoBtn = document.querySelector('button[title="Video"]');
 
     function startCallSimulation(video = false) {
-        const contact = contacts.find(c => c.id === activeId);
-        if (!contact) return;
+        const contactName = document.getElementById('header-name')?.textContent || 'Contact';
+        const contactInitials = contactName.substring(0, 1).toUpperCase();
 
-        callContactName.textContent = contact.name;
-        callAvatar.textContent = contact.initials;
-        callAvatar.className = `relative w-full h-full rounded-full bg-gradient-to-br ${contact.from} ${contact.to} flex items-center justify-center text-3xl font-bold text-white shadow-xl`;
+        callContactName.textContent = contactName;
+        callAvatar.textContent = contactInitials;
+        callAvatar.className = `relative w-full h-full rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-3xl font-bold text-white shadow-xl`;
         callStatus.textContent = video ? 'Incoming Video Call...' : 'Ringing...';
 
         callModal.classList.remove('hidden');
@@ -461,7 +411,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 10);
     }
 
-    // Call simulation is disabled - buttons are purely decorative for now
+    if (voiceBtn) voiceBtn.addEventListener('click', () => startCallSimulation(false));
+    if (videoBtn) videoBtn.addEventListener('click', () => startCallSimulation(true));
+    if (sideVoiceBtn) sideVoiceBtn.addEventListener('click', () => startCallSimulation(false));
+    if (sideVideoBtn) sideVideoBtn.addEventListener('click', () => startCallSimulation(true));
 
     function endCallSimulation() {
         callPanel.classList.remove('scale-100');
@@ -479,9 +432,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // =============================
-    //  BLOCK CONTACT SIMULATION
-    // =============================
     const blockContactBtn = document.getElementById('block-contact-btn');
     const blockedOverlay  = document.getElementById('blocked-overlay');
     const unblockBtn      = document.getElementById('unblock-btn');
@@ -491,7 +441,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentBlocked = !blockedContacts[activeId];
         blockedContacts[activeId] = currentBlocked;
 
-        // Re-run setActive to update the UI
         setActive(activeId);
         renderContacts(searchInput.value);
     }
@@ -499,9 +448,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (blockContactBtn) blockContactBtn.addEventListener('click', toggleBlockContact);
     if (unblockBtn) unblockBtn.addEventListener('click', toggleBlockContact);
 
-    // =============================
-    //  SEARCH IN CHAT HIGHLIGHTING
-    // =============================
     const chatSearchBtn = document.getElementById('chat-search-btn');
     const chatSearchInput = document.getElementById('chat-search-input');
     const headerStatusText = document.getElementById('header-status-text');
@@ -553,6 +499,65 @@ document.addEventListener('DOMContentLoaded', () => {
         return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
-    // ---- Init ----
+    function initReactions() {
+        document.querySelectorAll('.message-row').forEach(row => {
+            if (row.dataset.reactionsWired) return;
+            row.dataset.reactionsWired = 'true';
+
+            const trigger = row.querySelector('.reaction-trigger');
+            const panel = row.querySelector('.message-emoji-panel');
+            const list = row.querySelector('.reactions-list');
+            const activeReactions = {};
+
+            if (trigger && panel && list) {
+                trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    document.querySelectorAll('.message-emoji-panel').forEach(p => p.classList.add('hidden'));
+                    panel.classList.toggle('hidden');
+                });
+
+                panel.querySelectorAll('.quick-react-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const emoji = btn.textContent;
+                        if (activeReactions[emoji]) {
+                            delete activeReactions[emoji];
+                        } else {
+                            activeReactions[emoji] = 1;
+                        }
+                        renderReactionsList(list, activeReactions);
+                        panel.classList.add('hidden');
+                    });
+                });
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.message-emoji-panel') && !e.target.closest('.reaction-trigger')) {
+                document.querySelectorAll('.message-emoji-panel').forEach(p => p.classList.add('hidden'));
+            }
+        });
+    }
+
+    function renderReactionsList(list, activeReactions) {
+        list.innerHTML = '';
+        Object.keys(activeReactions).forEach(emoji => {
+            const badge = document.createElement('div');
+            badge.className = `flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] cursor-pointer transition-all duration-150 select-none bg-[#1e2130] border border-white/5 text-white/60 hover:border-violet-500/30 hover:text-white`;
+            badge.innerHTML = `<span>${emoji}</span><span class="font-bold">${activeReactions[emoji]}</span>`;
+            badge.addEventListener('click', (e) => {
+                e.stopPropagation();
+                delete activeReactions[emoji];
+                renderReactionsList(list, activeReactions);
+            });
+            list.appendChild(badge);
+        });
+    }
+
+    initReactions();
     renderContacts();
+    
+    if (scrollAnchor) {
+        scrollToBottom(false);
+    }
 });
