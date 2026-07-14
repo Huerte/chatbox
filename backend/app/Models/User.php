@@ -24,7 +24,7 @@ class User extends Authenticatable
     }
 
     public function chats() {
-        return $this->hasMany(Chats::class);
+        return $this->hasMany(Chats::class, 'sender_id');
     }
 
 }

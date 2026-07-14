@@ -50,7 +50,7 @@ class ChatsController extends Controller
     }
 
     public function destroy(Chats $chat) {
-        abort_if($chat->user_id !== auth()->id(), 403);
+        abort_if($chat->sender_id !== auth()->id(), 403);
         
         $chat->delete();
 
