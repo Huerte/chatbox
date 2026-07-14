@@ -1,29 +1,25 @@
+# Stage 1: build frontend assets (Vite + Tailwind)
 FROM node:20-alpine AS frontend
-
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
 COPY . .
 RUN npm run build
 
-FROM richarvey/nginx-php-fpm:latest
+# Stage 2: PHP 8.4 + Nginx runtime
+FROM webdevops/php-nginx:8.4-alpine
 
-WORKDIR /var/www/html
+ENV WEB_DOCUMENT_ROOT=/app/public
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
+WORKDIR /app
 
 COPY . .
-RUN chmod +x scripts/*.sh
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 COPY --from=frontend /app/public/build ./public/build
 
-RUN composer install --no-dev --optimize-autoloader --no-interaction
-
-ENV WEBROOT /var/www/html/public
-ENV PHP_ERRORS_STDERR 1
-ENV RUN_SCRIPTS 1
-ENV REAL_IP_HEADER 1
-ENV APP_ENV production
-ENV APP_DEBUG false
-ENV LOG_CHANNEL stderr
-ENV COMPOSER_ALLOW_SUPERUSER 1
-
-CMD ["/start.sh"]
+# Entrypoint hook — runs on every container start, before nginx/php-fpm boots
+COPY scripts/entrypoint.d/ /opt/docker/provision/entrypoint.d/
+RUN chmod +x /opt/docker/provision/entrypoint.d/*.sh \
+ && chown -R application:application /app
