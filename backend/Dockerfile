@@ -8,10 +8,14 @@ RUN npm run build
 
 FROM richarvey/nginx-php-fpm:latest
 
+WORKDIR /var/www/html
+
 COPY . .
 RUN chmod +x scripts/*.sh
 
 COPY --from=frontend /app/public/build ./public/build
+
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 ENV WEBROOT /var/www/html/public
 ENV PHP_ERRORS_STDERR 1
