@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ChatsController;
 use App\Http\Controllers\ProfileController;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/dashboard', function () {
@@ -24,7 +25,7 @@ Route::middleware('auth')->group(function () {
             'messages' => collect(),
         ]);
     });
-    
+
 });
 
 require __DIR__.'/auth.php';
