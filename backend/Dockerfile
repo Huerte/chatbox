@@ -1,12 +1,19 @@
-FROM richarvey/nginx-php-fpm:latest
+# Stage 1: build frontend assets (Vite + Tailwind) using a proper Node 20 image
+FROM node:20-alpine AS frontend
 
-# Install Node so we can build Vite/Tailwind assets during the image build
-RUN apk add --no-cache nodejs npm
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+# Stage 2: the actual PHP app image — no Node/npm shipped in the final image
+FROM richarvey/nginx-php-fpm:latest
 
 COPY . .
 
-# Build frontend assets (Vite + Tailwind) — equivalent to `collectstatic` in Django
-RUN npm install && npm run build
+# Bring in the compiled assets from the frontend stage
+COPY --from=frontend /app/public/build ./public/build
 
 ENV SKIP_COMPOSER 1
 ENV WEBROOT /var/www/html/public
