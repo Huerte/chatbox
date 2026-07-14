@@ -16,7 +16,7 @@ WORKDIR /app
 
 COPY . .
 RUN composer install --no-dev --optimize-autoloader --no-interaction
-
+ 
 COPY --from=frontend /app/public/build ./public/build
 
 # Entrypoint hook — runs on every container start, before nginx/php-fpm boots
