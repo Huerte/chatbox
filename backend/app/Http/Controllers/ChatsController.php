@@ -24,11 +24,18 @@ class ChatsController extends Controller
             'message' => ['required', 'max:500'],
         ]);
 
-        Chats::create([
+        $chat = Chats::create([
             'sender_id' => auth()->id(),
             'receiver_id' => $receiver->id,
             'message' => $validated['message']
         ]);
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'chat' => $chat
+            ]);
+        }
 
         return back();
 

@@ -4,6 +4,7 @@ Alpine.start();
 
 document.addEventListener('DOMContentLoaded', () => {
     const contactList = document.getElementById('contact-list');
+    if (!contactList) return;
     const noChatState = document.getElementById('no-chat-state');
     const chatArea = document.getElementById('chat-area');
     const messagesContainer = document.getElementById('messages-container');

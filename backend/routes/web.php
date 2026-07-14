@@ -5,9 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/chat', function () {
-    return view('chat.index');
-})->middleware(['auth', 'verified'])->name('chat.index');
+Route::redirect('/dashboard', '/chat')->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
