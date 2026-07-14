@@ -1,21 +1,10 @@
-# Stage 1: build frontend assets (Vite + Tailwind) using a proper Node 20 image
-FROM node:20-alpine AS frontend
-
-WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm install
-COPY . .
-RUN npm run build
-
-# Stage 2: the actual PHP app image — no Node/npm shipped in the final image
 FROM richarvey/nginx-php-fpm:latest
 
 COPY . .
+RUN chmod +x scripts/*.sh
 
-# Bring in the compiled assets from the frontend stage
 COPY --from=frontend /app/public/build ./public/build
 
-ENV SKIP_COMPOSER 1
 ENV WEBROOT /var/www/html/public
 ENV PHP_ERRORS_STDERR 1
 ENV RUN_SCRIPTS 1
