@@ -11,14 +11,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::get('/claim-admin', function () {
-        if (\App\Models\User::where('is_admin', true)->count() === 0) {
-            auth()->user()->update(['is_admin' => true]);
-            return redirect()->route('admin.index')->with('success', 'You have successfully claimed the Super Admin role!');
-        }
-        return redirect()->route('chat.index')->with('error', 'An admin already exists.');
-    });
-
     Route::get('/chat', [ChatsController::class, 'index'])->name('chat.index');
     Route::delete('/chat/{chat}', [ChatsController::class, 'destroy'])->name('chat.destroy');
     Route::get('/chat/{receiver}', [ChatsController::class, 'show'])->name('chat.show');
