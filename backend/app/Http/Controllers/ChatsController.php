@@ -30,6 +30,8 @@ class ChatsController extends Controller
             'message' => $validated['message']
         ]);
 
+        broadcast(new \App\Events\MessageSent($chat))->toOthers();
+
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,
@@ -45,7 +47,10 @@ class ChatsController extends Controller
 
         $currentUserId = auth()->id();
 
-        $messages = Chats::betweenUsers($currentUserId, $receiver->id)->orderBy('created_at', 'asc')->get();
+        $messages = Chats::with('reactions')
+            ->betweenUsers($currentUserId, $receiver->id)
+            ->orderBy('created_at', 'asc')
+            ->get();
         $users = User::all()->except(auth()->id());
 
         return view('chat.index', [

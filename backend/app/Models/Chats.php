@@ -31,4 +31,8 @@ class Chats extends Model
             $q->where('sender_id', $userId2)->where('receiver_id', $userId1);
         });
     }
+
+    public function reactions() {
+        return $this->hasMany(Reaction::class, 'chat_id');
+    }
 }

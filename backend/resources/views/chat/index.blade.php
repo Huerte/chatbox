@@ -179,12 +179,21 @@
 
                                 {{-- Message Bubble --}}
                                 <div class="px-4 py-2.5 shadow-sm {{ $isOutgoing ? 'bg-blue-600 text-white rounded-2xl rounded-br-sm' : 'bg-slate-800 text-slate-50 rounded-2xl rounded-bl-sm border border-slate-700/50' }}">
-                                    <p class="text-sm leading-relaxed">{{ $chat->message }}</p>
+                                    <p class="text-sm leading-relaxed whitespace-pre-wrap">{{ $chat->message }}</p>
                                 </div>
                             </div>
 
                             {{-- Reactions Badge list --}}
-                            <div class="reactions-list flex flex-wrap gap-1 mt-1.5 {{ $isOutgoing ? 'self-end mr-9' : 'self-start ml-9' }}"></div>
+                            <div class="reactions-list flex flex-wrap gap-1 mt-1.5 {{ $isOutgoing ? 'self-end mr-9' : 'self-start ml-9' }}">
+                                @php
+                                    $grouped = $chat->reactions->groupBy('emoji');
+                                @endphp
+                                @foreach($grouped as $emoji => $reactions)
+                                    <button type="button" data-reaction="{{ $emoji }}" class="flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] bg-slate-800 border border-slate-700 text-slate-300 hover:border-blue-500/50 hover:bg-slate-700 transition-all select-none cursor-pointer">
+                                        <span>{{ $emoji }}</span><span class="font-semibold text-slate-400">{{ $reactions->count() }}</span>
+                                    </button>
+                                @endforeach
+                            </div>
 
                             <span class="text-[11px] text-slate-500 mt-1 {{ $isOutgoing ? 'mr-9' : 'ml-9' }}">{{ $chat->created_at->format('h:i A') }}</span>
                         </div>
@@ -232,6 +241,7 @@
                             placeholder="Type your message..." 
                             required
                             class="flex-1 bg-transparent border-0 text-sm text-slate-50 placeholder-slate-400 focus:ring-0 resize-none py-1.5 px-1 max-h-32 scrollbar-thin outline-none"
+                            oninput="this.style.height = ''; this.style.height = Math.min(this.scrollHeight, 128) + 'px';"
                         ></textarea>
                         
                         <button type="button" id="emoji-toggle" class="p-1.5 text-slate-400 hover:text-slate-200 transition-colors flex-shrink-0" title="Emoji">
@@ -439,22 +449,45 @@
             activeMessageRow = null;
         }
 
-        function applyReaction(emoji, messageRow) {
-            if (!messageRow) return;
-            const list = messageRow.querySelector('.reactions-list');
-            if (!list) return;
-
-            const existing = list.querySelector(`[data-reaction="${emoji}"]`);
-            if (existing) {
-                existing.remove();
-            } else {
+        function renderReactions(listElement, reactionsData) {
+            listElement.innerHTML = '';
+            reactionsData.forEach(r => {
                 const badge = document.createElement('button');
                 badge.type = 'button';
-                badge.dataset.reaction = emoji;
+                badge.dataset.reaction = r.emoji;
                 badge.className = 'flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] bg-slate-800 border border-slate-700 text-slate-300 hover:border-blue-500/50 hover:bg-slate-700 transition-all select-none cursor-pointer';
-                badge.innerHTML = `<span>${emoji}</span><span class="font-semibold text-slate-400">1</span>`;
-                badge.addEventListener('click', () => badge.remove());
-                list.appendChild(badge);
+                badge.innerHTML = `<span>${r.emoji}</span><span class="font-semibold text-slate-400">${r.count}</span>`;
+                // Add click event for self-toggle
+                badge.addEventListener('click', () => applyReaction(r.emoji, listElement.closest('.message-row')));
+                listElement.appendChild(badge);
+            });
+        }
+
+        async function applyReaction(emoji, messageRow) {
+            if (!messageRow) return;
+            const chatId = messageRow.dataset.id;
+            if (chatId === 'temp-id') return; // Cannot react before message is saved
+
+            try {
+                const response = await fetch(`/chat/${chatId}/react`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({ emoji })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const list = messageRow.querySelector('.reactions-list');
+                    if (list) {
+                        renderReactions(list, data.reactions);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to apply reaction", err);
             }
         }
 
@@ -493,26 +526,34 @@
             msgContainer.addEventListener('scroll', hideGlobalPopover, { passive: true });
         }
 
-        function appendMessageToDOM(text) {
+        function appendMessageToDOM(text, isOutgoing = true, chatId = 'temp-id') {
             if (!container) return;
             const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             
-            const messageHtml = `
-                <div class="flex justify-end message-row group" data-id="temp-id">
-                    <div class="flex flex-col items-end max-w-[70%]">
+            const alignClass = isOutgoing ? 'justify-end' : 'justify-start';
+            const itemsClass = isOutgoing ? 'items-end' : 'items-start';
+            const rowDirectionClass = isOutgoing ? 'flex-row-reverse' : 'flex-row';
+            const bubbleClass = isOutgoing 
+                ? 'bg-blue-600 text-white rounded-2xl rounded-br-sm' 
+                : 'bg-slate-800 text-slate-50 rounded-2xl rounded-bl-sm border border-slate-700/50';
+            const marginClass = isOutgoing ? 'self-end mr-9' : 'self-start ml-9';
 
-                        <div class="flex items-end gap-2 flex-row-reverse">
+            const messageHtml = `
+                <div class="flex ${alignClass} message-row group" data-id="${chatId}">
+                    <div class="flex flex-col ${itemsClass} max-w-[70%]">
+
+                        <div class="flex items-end gap-2 ${rowDirectionClass}">
                             <button type="button" class="reaction-trigger-btn flex-shrink-0 w-7 h-7 rounded-full bg-slate-800 border border-slate-700/60 flex items-center justify-center text-slate-500 hover:text-slate-200 hover:bg-slate-700 opacity-0 group-hover:opacity-100 transition-all duration-150 self-end mb-0.5">
                                 <i data-lucide="smile-plus" class="w-3.5 h-3.5 stroke-[1.5]"></i>
                             </button>
-                            <div class="px-4 py-2.5 shadow-sm bg-blue-600 text-white rounded-2xl rounded-br-sm">
-                                <p class="text-sm leading-relaxed">${escapeHtml(text)}</p>
+                            <div class="px-4 py-2.5 shadow-sm ${bubbleClass}">
+                                <p class="text-sm leading-relaxed whitespace-pre-wrap">${escapeHtml(text)}</p>
                             </div>
                         </div>
 
-                        <div class="reactions-list flex flex-wrap gap-1 mt-1.5 self-end mr-9"></div>
+                        <div class="reactions-list flex flex-wrap gap-1 mt-1.5 ${marginClass}"></div>
 
-                        <span class="text-[11px] text-slate-500 mt-1 mr-9">${timeStr}</span>
+                        <span class="text-[11px] text-slate-500 mt-1 ${marginClass}">${timeStr}</span>
                     </div>
                 </div>
             `;
@@ -745,6 +786,7 @@
                     
                     // Clear textarea immediately
                     textarea.value = '';
+                    textarea.style.height = ''; // Reset height after send
                     textarea.rows = 1;
                     
                     // Hide file preview
@@ -766,10 +808,14 @@
                     })
                     .then(response => {
                         if (response.ok) {
-                            appendMessageToDOM(message);
+                            return response.json();
                         } else {
-                            console.error('Failed to send message');
-                            textarea.value = message;
+                            throw new Error('Failed to send message');
+                        }
+                    })
+                    .then(data => {
+                        if (data.success && data.chat) {
+                            appendMessageToDOM(message, true, data.chat.id);
                         }
                     })
                     .catch(error => {
@@ -784,6 +830,30 @@
                         form.dispatchEvent(new Event('submit'));
                     }
                 });
+            }
+        }
+        
+        // Listen for incoming messages and reactions
+        if (window.Echo) {
+            const currentUserId = {{ auth()->id() ?? 'null' }};
+            const currentReceiverId = {{ $receiver ? $receiver->id : 'null' }};
+            
+            if (currentUserId) {
+                window.Echo.private(`chat.${currentUserId}`)
+                    .listen('MessageSent', (e) => {
+                        if (currentReceiverId && e.chat.sender_id === currentReceiverId) {
+                            appendMessageToDOM(e.chat.message, false, e.chat.id);
+                        }
+                    })
+                    .listen('ReactionUpdated', (e) => {
+                        const messageRow = document.querySelector(`.message-row[data-id="${e.chat_id}"]`);
+                        if (messageRow) {
+                            const list = messageRow.querySelector('.reactions-list');
+                            if (list) {
+                                renderReactions(list, e.reactions);
+                            }
+                        }
+                    });
             }
         }
     });

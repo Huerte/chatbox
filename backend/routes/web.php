@@ -15,6 +15,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/chat/{chat}', [ChatsController::class, 'destroy'])->name('chat.destroy');
     Route::get('/chat/{receiver}', [ChatsController::class, 'show'])->name('chat.show');
     Route::post('/chat/{receiver}', [ChatsController::class, 'store'])->name('chat.store');
+    Route::post('/chat/{chat}/react', [\App\Http\Controllers\ReactionController::class, 'toggle'])->name('chat.react');
 
     Route::get('/', function () {
         return view('chat.index', [
