@@ -13,7 +13,12 @@ class Chats extends Model
     protected $fillable = [
         'sender_id',
         'receiver_id',
+        'group_id',
         'message',
+        'attachment_path',
+        'attachment_type',
+        'reply_to_id',
+        'is_forwarded',
     ];
 
     public function sender() {
@@ -24,11 +29,23 @@ class Chats extends Model
         return $this->belongsTo(User::class, 'receiver_id');
     }
 
+    public function group() {
+        return $this->belongsTo(Group::class, 'group_id');
+    }
+
+    public function replyTo() {
+        return $this->belongsTo(Chats::class, 'reply_to_id');
+    }
+
+    public function deletions() {
+        return $this->hasMany(ChatDeletion::class, 'chat_id');
+    }
+
     public function scopeBetweenUsers($query, $userId1, $userId2) {
-        return $query->where(function ($q) use ($userId1, $userId2) {
+        return $query->whereNull('group_id')->where(function ($q) use ($userId1, $userId2) {
             $q->where('sender_id', $userId1)->where('receiver_id', $userId2);
         })->orWhere(function ($q) use ($userId1, $userId2) {
-            $q->where('sender_id', $userId2)->where('receiver_id', $userId1);
+            $q->whereNull('group_id')->where('sender_id', $userId2)->where('receiver_id', $userId1);
         });
     }
 

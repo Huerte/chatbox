@@ -17,15 +17,17 @@ class ReactionUpdated implements ShouldBroadcastNow
     public $chat_id;
     public $reactions;
     public $receiver_id;
+    public $group_id;
 
     /**
      * Create a new event instance.
      */
-    public function __construct($chat_id, $reactions, $receiver_id)
+    public function __construct($chat_id, $reactions, $receiver_id, $group_id = null)
     {
         $this->chat_id = $chat_id;
         $this->reactions = $reactions;
         $this->receiver_id = $receiver_id;
+        $this->group_id = $group_id;
     }
 
     /**
@@ -35,6 +37,12 @@ class ReactionUpdated implements ShouldBroadcastNow
      */
     public function broadcastOn(): array
     {
+        if ($this->group_id) {
+            return [
+                new PrivateChannel('chat-group.' . $this->group_id),
+            ];
+        }
+
         return [
             new PrivateChannel('chat.' . $this->receiver_id),
         ];

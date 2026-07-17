@@ -41,7 +41,7 @@ class ReactionController extends Controller
 
         // Broadcast to receiver
         $receiverId = $chat->sender_id === $userId ? $chat->receiver_id : $chat->sender_id;
-        broadcast(new ReactionUpdated($chat->id, $reactions, $receiverId))->toOthers();
+        broadcast(new ReactionUpdated($chat->id, $reactions, $receiverId, $chat->group_id))->toOthers();
 
         return response()->json([
             'status' => 'success',

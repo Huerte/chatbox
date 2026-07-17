@@ -28,4 +28,30 @@ class User extends Authenticatable
         return $this->hasMany(Chats::class, 'sender_id');
     }
 
+    public function friendshipsSent() {
+        return $this->hasMany(Friendship::class, 'sender_id');
+    }
+
+    public function friendshipsReceived() {
+        return $this->hasMany(Friendship::class, 'receiver_id');
+    }
+
+    public function groups() {
+        return $this->belongsToMany(Group::class, 'group_members', 'user_id', 'group_id')->withTimestamps();
+    }
+
+    public function friendIds() {
+        $sent = $this->friendshipsSent()->where('status', 'accepted')->pluck('receiver_id')->toArray();
+        $received = $this->friendshipsReceived()->where('status', 'accepted')->pluck('sender_id')->toArray();
+        return array_unique(array_merge($sent, $received));
+    }
+
+    public function friends() {
+        return User::whereIn('id', $this->friendIds())->get();
+    }
+
+    public function isFriendWith($userId) {
+        return in_array($userId, $this->friendIds());
+    }
+
 }
