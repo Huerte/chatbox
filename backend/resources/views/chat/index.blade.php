@@ -108,6 +108,14 @@
                     </div>
                     Settings
                 </button>
+                @if(auth()->user()->is_admin)
+                <a href="{{ route('admin.index') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 transition-colors">
+                    <div class="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="shield" class="w-3.5 h-3.5 stroke-[1.5] text-blue-400"></i>
+                    </div>
+                    Admin Dashboard
+                </a>
+                @endif
             </div>
             <div class="border-t border-slate-800 py-1.5">
                 <form method="POST" action="{{ route('logout') }}">

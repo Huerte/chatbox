@@ -30,6 +30,13 @@ Route::middleware('auth')->group(function () {
         return redirect('login');
     });
 
+    Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\AdminController::class, 'index'])->name('index');
+        Route::post('/users/{user}/toggle-admin', [\App\Http\Controllers\AdminController::class, 'toggleAdmin'])->name('users.toggle');
+        Route::delete('/users/{user}', [\App\Http\Controllers\AdminController::class, 'destroyUser'])->name('users.destroy');
+        Route::delete('/chats/{chat}', [\App\Http\Controllers\AdminController::class, 'destroyChat'])->name('chats.destroy');
+    });
+
 });
 
 require __DIR__.'/auth.php';
